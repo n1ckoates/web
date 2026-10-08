@@ -23,7 +23,7 @@
 		"react-tweet": "^3.3.1",
 		"remark-smartypants": "^3.0.3",
 		"rss": "^1.2.2",
-		"sharp": "0.35.4",
+		"sharp": "0.35.5",
 		"sugar-high": "^2.2.0",
 		"tailwindcss": "^4.3.3"
 	},
