@@ -16,13 +16,24 @@ export default function Menu({
 	useEffect(() => {
 		const main = document.getElementById("main");
 		main?.toggleAttribute("inert", open);
-		document.body.classList.toggle("overflow-hidden", open);
 
-		return () => {
-			main?.removeAttribute("inert");
-			document.body.classList.remove("overflow-hidden");
-		};
+		if (open) {
+			document.body.classList.add("overflow-hidden");
+			return () => main?.removeAttribute("inert");
+		}
+
+		// Unlock scrolling only once the overlay has faded out (150ms), so Safari
+		// re-samples its toolbar color without the overlay still on screen.
+		const timeout = setTimeout(
+			() => document.body.classList.remove("overflow-hidden"),
+			150,
+		);
+		return () => clearTimeout(timeout);
 	}, [open]);
+
+	useEffect(() => {
+		return () => document.body.classList.remove("overflow-hidden");
+	}, []);
 
 	useEffect(() => {
 		function handleResize() {
@@ -66,9 +77,10 @@ export default function Menu({
 				aria-hidden={!open}
 				inert={!open}
 				className={clsx(
-					"bg-background/90 absolute top-0 left-0 -z-10 h-dvh w-screen backdrop-blur-xl transition-[opacity,visibility]",
-					// Hidden (not just transparent) when closed, otherwise Safari sees a
-					// fixed full-height layer and fills its bottom toolbar to match.
+					"bg-background/90 absolute top-0 left-0 -z-10 h-lvh w-screen backdrop-blur-xl transition-[opacity,visibility]",
+					// lvh so it extends behind Safari's toolbar. Hidden (not just
+					// transparent) when closed, otherwise Safari sees a fixed
+					// full-height layer and fills its bottom toolbar to match.
 					{ "invisible opacity-0": !open },
 				)}
 			>
