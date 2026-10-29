@@ -66,8 +66,10 @@ export default function Menu({
 				aria-hidden={!open}
 				inert={!open}
 				className={clsx(
-					"bg-background/90 absolute top-0 left-0 -z-10 h-dvh w-screen backdrop-blur-xl transition",
-					{ "pointer-events-none opacity-0": !open },
+					"bg-background/90 absolute top-0 left-0 -z-10 h-dvh w-screen backdrop-blur-xl transition-[opacity,visibility]",
+					// Hidden (not just transparent) when closed, otherwise Safari sees a
+					// fixed full-height layer and fills its bottom toolbar to match.
+					{ "invisible opacity-0": !open },
 				)}
 			>
 				<div className="divide-border flex flex-col divide-y px-5 pt-20 text-lg font-medium">
