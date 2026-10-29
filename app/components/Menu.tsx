@@ -16,24 +16,13 @@ export default function Menu({
 	useEffect(() => {
 		const main = document.getElementById("main");
 		main?.toggleAttribute("inert", open);
+		document.body.classList.toggle("overflow-hidden", open);
 
-		if (open) {
-			document.body.classList.add("overflow-hidden");
-			return () => main?.removeAttribute("inert");
-		}
-
-		// Unlock scrolling only once the overlay has faded out (150ms), so Safari
-		// re-samples its toolbar color without the overlay still on screen.
-		const timeout = setTimeout(
-			() => document.body.classList.remove("overflow-hidden"),
-			150,
-		);
-		return () => clearTimeout(timeout);
+		return () => {
+			main?.removeAttribute("inert");
+			document.body.classList.remove("overflow-hidden");
+		};
 	}, [open]);
-
-	useEffect(() => {
-		return () => document.body.classList.remove("overflow-hidden");
-	}, []);
 
 	useEffect(() => {
 		function handleResize() {
@@ -50,7 +39,7 @@ export default function Menu({
 				aria-label="Toggle navigation"
 				aria-expanded={open}
 				onClick={() => setOpen(!open)}
-				className="hover:bg-secondary/70 relative grid size-8 place-items-center rounded-md p-2"
+				className="hover:bg-secondary/70 relative z-10 grid size-8 place-items-center rounded-md p-2"
 				type="button"
 			>
 				<span
@@ -77,11 +66,14 @@ export default function Menu({
 				aria-hidden={!open}
 				inert={!open}
 				className={clsx(
-					"bg-background/90 absolute top-0 left-0 -z-10 h-lvh w-screen backdrop-blur-xl transition-[opacity,visibility]",
-					// lvh so it extends behind Safari's toolbar. Hidden (not just
-					// transparent) when closed, otherwise Safari sees a fixed
-					// full-height layer and fills its bottom toolbar to match.
-					{ "invisible opacity-0": !open },
+					// Safari tints its bottom toolbar to match a fixed element at the
+					// viewport's bottom edge, re-checking only when one is added or
+					// removed. So this is its own fixed layer (not a negative z-index,
+					// which Safari ignores) with a solid background, and is removed with
+					// display: none when closed. It starts at 20% opacity because Safari
+					// ignores layers under 10% when the menu is added.
+					"bg-background fixed inset-0 z-0 transition-[opacity,display] transition-discrete starting:opacity-20",
+					{ "hidden opacity-0": !open },
 				)}
 			>
 				<div className="divide-border flex flex-col divide-y px-5 pt-20 text-lg font-medium">
